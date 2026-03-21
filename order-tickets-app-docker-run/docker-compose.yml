@@ -1,0 +1,43 @@
+services:
+  web:
+    image: 08edgarallan94/order-tickets-app:latest
+    ports:
+      # puedes poner los puertos (maquina anfitrion:contenedor) que quieras, pero el puerto del contenedor debe ser el mismo que la variable de entorno PORT, esto con el fin de que la aplicación funcione correctamente
+      - "3000:3000" 
+    environment:
+      # PORT tiene que ser el mismo puerto del contenedor para que la aplicación funcione correctamente.
+      - PORT=3000
+      - SQLSERVER_DB=aguacate_bd
+      - SQLSERVER_USER=sa
+      - SQLSERVER_PWD=PasswordSeguro123!
+      - SQLSERVER_HOST=mssql_server
+      - SQLSERVER_PORT=1433
+    networks:
+      - node-tickets-app-network 
+    depends_on:
+      - db 
+  db:
+  # Se usa otro dockerfile en este caso de creación del contenedor de la base de datos (sql server), esto con el fin de importar la base de datos contenida en la carpeta backup, el comando bash que se llama en ese dockerfile no hace nada si detecta que la base de datos existe gracias al volumen de este contenedor
+    build:
+      context: .
+      dockerfile: Dockerfile.sql
+    container_name: mssql_server
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=PasswordSeguro123!
+    ports:
+      - "1434:1433"
+    networks:
+      - node-tickets-app-network 
+    volumes:
+    # todo cambio en la base de datos se conserva
+      - sql_data:/var/opt/mssql/data
+    # en este caso se guarda el archivo aguacate_db.bak a la carpeta avocadoBackup del contenedor de sql server para efectuar la restauración con el bash que llama el Dockerfile.sql  
+      - ./avocadoBackup:/var/opt/mssql/backup
+
+networks:
+  node-tickets-app-network:
+    driver: bridge 
+
+volumes:
+  sql_data:
