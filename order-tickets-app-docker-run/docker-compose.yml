@@ -17,7 +17,6 @@ services:
     depends_on:
       - db 
   db:
-  # Se usa otro dockerfile en este caso de creación del contenedor de la base de datos (sql server), esto con el fin de importar la base de datos contenida en la carpeta backup, el comando bash que se llama en ese dockerfile no hace nada si detecta que la base de datos existe gracias al volumen de este contenedor
     build:
       context: .
       dockerfile: Dockerfile.sql
@@ -32,7 +31,7 @@ services:
     volumes:
     # todo cambio en la base de datos se conserva
       - sql_data:/var/opt/mssql/data
-    # en este caso se guarda el archivo aguacate_db.bak a la carpeta avocadoBackup del contenedor de sql server para efectuar la restauración con el bash que llama el Dockerfile.sql  
+    # en este caso se guarda el archivo aguacate_db.bak a la carpeta backup del contenedor de sql server para efectuar la restauración con el bash que llama el Dockerfile.sql  
       - ./avocadoBackup:/var/opt/mssql/backup
 
 networks:
